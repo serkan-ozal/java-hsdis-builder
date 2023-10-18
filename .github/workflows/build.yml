@@ -16,5 +16,5 @@ jobs:
       - name: Checkout OpenJDK code
         uses: actions/checkout@v3
         with:
-          repository: https://github.com/openjdk/jdk
+          repository: openjdk/jdk
           ref: ${{ github.event.inputs.tag }}
