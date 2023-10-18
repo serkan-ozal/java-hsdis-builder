@@ -2,10 +2,19 @@ name: Build
 
 on:
   workflow_dispatch:
-
+    inputs:
+      tag:
+        description: "OpenJDK Tag name"
+        required: true
 jobs:
   build:
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-latest, macos-latest ]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout OpenJDK code
+        uses: actions/checkout@v3
+        with:
+          repository: https://github.com/openjdk/jdk
+          ref: ${{ github.event.inputs.tag }}
