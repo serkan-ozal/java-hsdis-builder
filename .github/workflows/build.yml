@@ -10,11 +10,32 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ ubuntu-latest ]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          path: main
       - name: Checkout OpenJDK code
         uses: actions/checkout@v3
         with:
+          path: openjdk
           repository: openjdk/jdk
           ref: ${{ github.event.inputs.tag }}
+      - name: Build on Ubuntu
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        run: | 
+          cd "$GITHUB_WORKSPACE/main"
+          ./scripts/build-ubuntu.sh
+      - name: Build on MacOS
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: |
+          cd "$GITHUB_WORKSPACE/main"
+          ./scripts/build-macos.sh
+      - name: Build on Windows
+        shell: pwsh
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
+          cd "$env:GITHUB_WORKSPACE\main"
+          Powershell.exe -File scripts\build-windows.ps1
