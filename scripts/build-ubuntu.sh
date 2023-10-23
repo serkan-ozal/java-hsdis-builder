@@ -2,7 +2,7 @@
 
 echo "[HSDIS-BUILDER] INFO - Checking out JDK code ..."
 mkdir jdk
-if [ "$JDK_NAME" = "OpenJDK" ]; then
+if [ "$JDK_DISTRIBUTION" = "openjdk" ]; then
   if [ "$JDK_VERSION" = "21" ]; then
     git clone https://github.com/openjdk/jdk jdk
     pushd jdk
@@ -12,7 +12,7 @@ if [ "$JDK_NAME" = "OpenJDK" ]; then
     echo "[HSDIS-BUILDER] ERROR - Invalid OpenJDK version: ${JDK_VERSION}"
     exit 1
   fi
-elif [ "$JDK_NAME" = "Amazon Corretto" ]; then
+elif [ "$JDK_DISTRIBUTION" = "corretto" ]; then
   if [ "$JDK_VERSION" = "21" ]; then
     git clone https://github.com/corretto/corretto-21 jdk
   else
@@ -20,7 +20,7 @@ elif [ "$JDK_NAME" = "Amazon Corretto" ]; then
     exit 1
   fi
 else
-  echo "[HSDIS-BUILDER] ERROR - Invalid JDK name: ${JDK_NAME}"
+  echo "[HSDIS-BUILDER] ERROR - Invalid JDK distribution: ${JDK_DISTRIBUTION}"
   exit 1
 fi
 echo "[HSDIS-BUILDER] INFO - Checked out JDK code"
@@ -37,12 +37,7 @@ echo "[HSDIS-BUILDER] INFO - Downloaded binutils"
 
 echo "[HSDIS-BUILDER] INFO - Updating repositories ..."
 sudo add-apt-repository universe
-if [ "$JDK_NAME" = "OpenJDK" ]; then
-  sudo add-apt-repository ppa:openjdk-r/ppa
-elif [ "$JDK_NAME" = "Amazon Corretto" ]; then
-  wget -O- https://apt.corretto.aws/corretto.key | sudo apt-key add -
-  sudo add-apt-repository "deb https://apt.corretto.aws stable main"
-fi
+sudo add-apt-repository ppa:openjdk-r/ppa
 sudo apt update
 echo "[HSDIS-BUILDER] INFO - Updated repositories"
 
@@ -54,19 +49,14 @@ sudo apt-get install libfontconfig1-dev
 sudo apt-get install libx11-dev libxext-dev libxrender-dev libxrandr-dev libxtst-dev libxt-dev
 echo "[HSDIS-BUILDER] INFO - Installed dependencies"
 
-echo "[HSDIS-BUILDER] INFO - Installing Boot JDK ..."
-if [ "$JDK_NAME" = "OpenJDK" ]; then
+if [ "$JDK_DISTRIBUTION" = "openjdk" ]; then
+  echo "[HSDIS-BUILDER] INFO - Installing Boot JDK ..."
   BOOT_JDK_VERSION=${JDK_VERSION}
   if [ "$JDK_VERSION" = "21" ]; then
     sudo apt-get install -y openjdk-${BOOT_JDK_VERSION}-jdk
   fi
-elif [ "$JDK_NAME" = "Amazon Corretto" ]; then
-  BOOT_JDK_VERSION=${JDK_VERSION}
-  if [ "$JDK_VERSION" = "21" ]; then
-    sudo apt-get install -y java-${BOOT_JDK_VERSION}-amazon-corretto-jdk
-  fi
+  echo "[HSDIS-BUILDER] INFO - Installed Boot JDK"
 fi
-echo "[HSDIS-BUILDER] INFO - Installed Boot JDK"
 
 echo "[HSDIS-BUILDER] INFO - Building hsdis ..."
 pushd "jdk"
