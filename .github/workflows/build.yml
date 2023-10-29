@@ -23,19 +23,46 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-latest ]
+        os: [ ubuntu-22.04, macos-13, windows-2022 ]
     env:
       JDK_DISTRIBUTION: ${{ github.event.inputs.jdk_distribution }}
       JDK_VERSION: ${{ github.event.inputs.jdk_version }}
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Install systeminformation NPM package
+        run: npm install systeminformation
+      - name: Print System Info
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const si = require('systeminformation');
+
+            si.system()
+              .then(data => console.log('System:', data))
+              .catch(error => console.error('Error occurred while getting System info:', error));
+
+            si.osInfo()
+              .then(data => console.log('OS:', data))
+              .catch(error => console.error('Error occurred while getting OS info:', error));
+
+            si.cpu()
+              .then(data => console.log('CPU:', data))
+              .catch(error => console.error('Error occurred while getting CPU info:', error));
+
+            si.cpuFlags()
+              .then(data => console.log('CPU Flags:', data))
+              .catch(error => console.error('Error occurred while getting CPU flags info:', error));
+
+            si.mem()
+              .then(data => console.log('Memory:', data))
+              .catch(error => console.error('Error occurred while getting memory info:', error));
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
           path: main
       - name: Install cygwin on Windows
         uses: cygwin/cygwin-install-action@v4
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
         with:
           packages: gcc-core,mingw64-x86_64-gcc-core,mingw64-x86_64-gcc-g++,mingw64-x86_64-glib2.0,make,autoconf,zip,unzip
       - name: Install Boot JDK
@@ -45,18 +72,18 @@ jobs:
           distribution: ${{ github.event.inputs.jdk_distribution }}
           java-version: ${{ github.event.inputs.jdk_version }}
       - name: Build on Ubuntu
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         run: | 
           cd "$GITHUB_WORKSPACE/main"
           ./scripts/build-ubuntu.sh
       - name: Build on MacOS
-        if: ${{ matrix.os == 'macos-latest' }}
+        if: ${{ startsWith(matrix.os, 'macos') }}
         run: |
           cd "$GITHUB_WORKSPACE/main"
           ./scripts/build-macos.sh
       - name: Build on Windows
         shell: pwsh
-        if: ${{ matrix.os == 'windows-latest' }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
           cd "$env:GITHUB_WORKSPACE\main"
           Powershell.exe -File scripts\build-windows.ps1
