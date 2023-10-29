@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, macos-latest ]
+        os: [ windows-latest ]
     env:
       JDK_DISTRIBUTION: ${{ github.event.inputs.jdk_distribution }}
       JDK_VERSION: ${{ github.event.inputs.jdk_version }}
@@ -33,6 +33,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           path: main
+      - name: Install cygwin on Windows
+        uses: cygwin/cygwin-install-action@v4
+        if: ${{ matrix.os == 'windows-latest' }}
+        with:
+          packages: gcc-core,mingw64-x86_64-gcc-core,mingw64-x86_64-gcc-g++,mingw64-x86_64-glib2.0,make,autoconf,zip,unzip
       - name: Install Boot JDK
         uses: actions/setup-java@v3
         if: ${{ github.event.inputs.jdk_distribution != 'openjdk' }}
