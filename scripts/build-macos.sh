@@ -47,8 +47,14 @@ fi
 
 echo "[HSDIS-BUILDER] INFO - Building hsdis ..."
 pushd "jdk"
+brew install autoconf
 bash configure --with-hsdis=binutils --with-binutils-src=${BINUTILS_PATH}
 make build-hsdis
-echo "HSDIS_BUILD_ARTIFACT_PATH=$(pwd)/build/macosx-x86_64-server-release/support/hsdis/hsdis-amd64.dylib" >> $GITHUB_ENV
+CPU_ARCH=$(uname -m)
+if [ "$CPU_ARCH" = "arm64" ]; then
+  echo "HSDIS_BUILD_ARTIFACT_PATH=$(pwd)/build/macosx-aarch64-server-release/support/hsdis/hsdis-aarch64.dylib" >> $GITHUB_ENV
+else
+  echo "HSDIS_BUILD_ARTIFACT_PATH=$(pwd)/build/macosx-x86_64-server-release/support/hsdis/hsdis-amd64.dylib" >> $GITHUB_ENV
+fi
 popd
 echo "[HSDIS-BUILDER] INFO - Built hsdis"

@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-13, windows-2022 ]
+        os: [ ubuntu-22.04, macos-13, macos-13-xlarge, windows-2022 ]
     env:
       JDK_DISTRIBUTION: ${{ github.event.inputs.jdk_distribution }}
       JDK_VERSION: ${{ github.event.inputs.jdk_version }}
